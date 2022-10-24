@@ -5,12 +5,9 @@ from sys import argv as args, exit
 vars={}
 file="helloWorld.stsc"
 file = args[1]
-forcerun="--forcerun" in args
-timed= "--time" in args
-#make the interpreter not exit on error (in most cases)
-#WARNING: THIS IS NOT A GOOD IDEA
-#i made this for reasons that i dont know myself
-#use at your own risk, because this is a bad idea, and it might return unexpected results
+
+forcerun="--forcerun" in args #tries to ignore errors in the code.
+timed= "--time" in args #outputs the time it took to run the program
 
 if timed:
     import time
@@ -29,7 +26,7 @@ if forcerun:
 operators= ["+","*","/","<<",">>","^","==","<=",">=","-"]
 
 def kwDef(line,locals:dict=None):
-    #print("a")
+    #defines a function
     global vars,curLin
     working=cut(line,"def")
     name=working.replace("{","").replace("}","").strip()
@@ -98,6 +95,7 @@ def kwIf(line,locals:dict=None):
         errorMessage("error resolving if statement, ",e=e)
 
 def kwVar(line,local=False,locals:dict=None):
+    #declares a variable
     global vars
     working=cut(line,"var")
     if working.startswith("str"):
@@ -191,16 +189,14 @@ def kwEnd(line,locals:dict=None):
     onExit()
 
 
-def runFunction(line): #Feeling cute, might git reset --hard later after i break this
+def runFunction(line):
     try:
         global vars
         locals={}
         for i in vars:
-            locals[i]=vars[i] #for some reason locals=vars doesnt work and will change vars, when i edit locals. Im extremely confused
-
-        locals["amogus"]=("str","sus")
-
-        def localVar(line,locals):  #did it need to be like this? no. did i do this first, then change the system, and not bother to update this? yes. I mean, its not clean, but it works, so i dont care
+            locals[i]=vars[i] 
+            
+        def localVar(line,locals): 
 
             tmp=kwVar(line,local=True,locals=locals)
 
@@ -209,7 +205,7 @@ def runFunction(line): #Feeling cute, might git reset --hard later after i break
             return locals
 
 
-        #we need proxies for the functions, as they are local, and arent supposed to do global stuff
+        #we need proxies for the functions (at this point, only the var function is a proxy),so we dont write to the global vars
         funwords={ 
         "var":localVar,
         "out":kwOut,
@@ -219,26 +215,22 @@ def runFunction(line): #Feeling cute, might git reset --hard later after i break
         "goto":kwGoto,
         None:None
         }
-        #this is me from the past! If you are trying to understand what im trying to do here, i am sorry, i dont know either
-        #anyway, good lucK!
-        #this is me from the future. Past me was dumb.
-        #it didnt need to be this complicated.
+ 
 
         funLine=line
         while funLine<len(program):
             c=program[funLine]
             kw=c.strip().split(" ")[0]
-            #print(kw,len(program),funLine)
+
             if kw == "return":
                 return getValue(cut(c,"return"),locals)
             if kw in funwords:
                 funwords[kw](c,locals)
             else:
-                # #yes, im lazy, and the minimum required is to make this work, and i dont care for now if its inconvenient
                  if '=' in c:
                      if c.strip().split("=")[0].strip() in vars:
-                         errorMessage("Vars cant be changed in functions without using var!")
-                #         setVar(c.strip().split("=")[0].strip(),c.strip().split("=")[1].strip())
+                         errorMessage("Vars cant be changed in functions without using var keyword!")
+                         #this might be implemented in the future, but for now, it would write to the global vars, which we dont want, so its not allowed
             funLine+=1
         errorMessage("Function ended without return statement!")
     except Exception as e:
@@ -304,7 +296,6 @@ def solveEquasion(equasion: str,locals:dict=None) -> float:
                     break
             else:
                 errorMessage("No matching bracket")
-            #print(equasion[start + 1 : stop])
             tmpequasion = equasion[:start]
             tmpequasion += str(int(getValue(equasion[start + 1 : stop],locals)))
             tmpequasion += equasion[stop + 1 :]
@@ -350,12 +341,11 @@ def solveEquasion(equasion: str,locals:dict=None) -> float:
             for k in range(len(orderOfOps)):
                 if ops[i] in orderOfOps[k]:
                     order.append(k)
-        #print(ops,values,order)
         # now we have the order in which the operators should be solved, we need to solve them
         try:
             minorder = max(order)
         except Exception as e:
-            errorMessage(f"Critical error when solving math!{order}{values}{ops}")
+            errorMessage(f"Critical error when solving math, failed to parse input: {input}\n{order}\n{values}\n{ops}")
         for i in range(len(ops)):
             if order[i] == minorder:
                 values[i]=solveBasicMath(f"{float(values[i])}{ops[i]}{float(values[i + 1])}")
@@ -391,9 +381,9 @@ def cleanString(input : str):
 
 def solveBasicMath(input:str,locals:dict=None) -> int|float|bool:
     """ input: A math equasion, with two numbers or variables and one operator
-        output: A solution
+        returns: A solution
     """
-    #print(input)
+
     global operators
     ops=operators
     if isIn(ops,input):
@@ -470,7 +460,7 @@ def getValue(input:str,locals:dict=None):
                     if input.startswith("!"):
                         return not getValue(input[1:])
                     errorMessage(f"Unknown value type : {input}", e=Exception("Unknown type exception"))
-                    #raise Exception("Unknown value type:", input)
+
                     return f'"{input}"'
 
 def isTruthy(inp):
@@ -478,7 +468,7 @@ def isTruthy(inp):
         "true",
         "1",
         "yes",
-        "Yes, do as I say!"#Felt cute, might remove my desktop environment later
+        "yes, do as i say!"´
         ]
 
 
@@ -518,6 +508,9 @@ def cut(input:str,toRemove:str):
         return working[len(toRemove):].strip()
 
 def errorMessage(message:str,e:Exception=None):
+    #if the exceptiom is a SystemExit, we just want to exit
+    if e!=None and type(e)==SystemExit:
+        raise e
     global forcerun
     print("\033[91mError: "+message)
     if e == None:
@@ -525,8 +518,6 @@ def errorMessage(message:str,e:Exception=None):
     else:
         lineInInterpreter=e.__traceback__.tb_lineno
     print(f"\033[0mError dump: \nvars: {vars}\nlineinProgram:{curLin+1}\nlineinInterpreter:{lineInInterpreter}\033[0m")
-
-    
     if forcerun:
         print("\033[0merror ignored")
         return
