@@ -468,7 +468,7 @@ def isTruthy(inp):
         "true",
         "1",
         "yes",
-        "yes, do as i say!"´
+        "yes, do as i say!"
         ]
 
 
