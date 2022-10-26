@@ -7,8 +7,10 @@ import platform
 plt=platform.python_version().split(".")
 if plt[0]=="3" and plt[1]>"10":
     print("python >3.10 is required")
+    exit()
 if plt[0]<"3":
     print("python >3.10 is required")
+    exit()
 vars={}
 file="helloWorld.stsc"
 file = args[1]
