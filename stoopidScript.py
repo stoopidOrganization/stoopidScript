@@ -2,6 +2,13 @@ import array
 from dataclasses import replace
 import locale
 from sys import argv as args, exit
+import platform
+
+plt=platform.python_version().split(".")
+if plt[0]=="3" and plt[1]>"10":
+    print("python >3.10 is required")
+if plt[0]<"3":
+    print("python >3.10 is required")
 vars={}
 file="helloWorld.stsc"
 file = args[1]
