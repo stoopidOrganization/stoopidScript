@@ -377,7 +377,6 @@ def solveEquasion(equasion: str,locals:dict=None) -> float:
             return (float(str((getValue(equasion,locals))))
             )
         elif len(ops) == 1:
-            #return float(operators[ops[0]](float(values[0]), float(values[1])))
             return solveBasicMath(f"{float(values[0])}{ops[0]}{float(values[1])}")
         else:
 
@@ -446,11 +445,8 @@ def getValue(input:str,locals:dict=None):
             except:
                 errorMessage(f"Array index {input} out of range")
     if locals!=None:
-        try:
-            if input in locals:
-                return locals[input][1]
-        except:
-            print(input,locals)
+        if input in locals:
+            return locals[input][1]        
     global vars
     if input in vars:
         if vars[input][0]=="func":
