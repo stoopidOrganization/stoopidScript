@@ -6,15 +6,15 @@
 you need to have python >= 3.10 installed, then you can just run it with `python stoopidScript.py <path to file>`
 ### The available commands are
 
- ```
- var <type> <name> = <value>
- out <value>
- outln <value>
- if <condition>{
-    <code>
- }
- goto <line>
- ```
+- var <type> <name> = <value>
+- out <value>
+- outln <value>
+    - out and outln can use * to print all variables for debugging purposes
+- if <condition>{  
+    \<code>  
+ }  
+- goto <line>
+
 ### the variable types are:
 - int  
 - float  
