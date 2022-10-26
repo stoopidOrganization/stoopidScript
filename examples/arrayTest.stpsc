@@ -1,0 +1,8 @@
+var array test = 3
+test[0]=1
+test[1]=2
+test[2]=54
+outln test
+outln test[0]
+outln test[1]
+outln test[2]

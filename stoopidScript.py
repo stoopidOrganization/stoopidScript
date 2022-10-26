@@ -168,6 +168,12 @@ def kwVar(line,local=False,locals:dict=None):
             name=working.strip()
             type="label"
             value=curLin
+    elif working.startswith("array"):
+        working=cut(working,"array")
+        working=working.split('=')
+        name=working[0].strip()
+        type="array"
+        value=[ None for i in range(int(getValue(working[1], locals)))]
     if local:
         return (name,type,value)
     else:
@@ -176,12 +182,18 @@ def kwVar(line,local=False,locals:dict=None):
 def kwOut(line,locals:dict=None):
     working=cut(line,"out")
     global vars
+    if working.strip() == "*":
+        print(vars)
+        return
     working=getValue(working, locals)
     print(cleanString(str(working)),end="")
 
 def kwOutln(line,locals:dict=None):
     working=cut(line,"outln")
     global vars
+    if working.strip() == "*":
+        print(vars)
+        return
     working=getValue(working, locals)
     print(cleanString(str(working)))
 
@@ -365,7 +377,6 @@ def solveEquasion(equasion: str,locals:dict=None) -> float:
             return (float(str((getValue(equasion,locals))))
             )
         elif len(ops) == 1:
-            #return float(operators[ops[0]](float(values[0]), float(values[1])))
             return solveBasicMath(f"{float(values[0])}{ops[0]}{float(values[1])}")
         else:
 
@@ -427,12 +438,15 @@ def getValue(input:str,locals:dict=None):
         return 0
     if getRawType(input)=="str":
         input=input.strip()
+        if "[" in input:
+            try:
+                newInput=input.split("[")[0]
+                return getValue(newInput,locals)[getValue(input.split("[")[1].split("]")[0],locals)]
+            except:
+                errorMessage(f"Array index {input} out of range")
     if locals!=None:
-        try:
-            if input in locals:
-                return locals[input][1]
-        except:
-            print(input,locals)
+        if input in locals:
+            return locals[input][1]        
     global vars
     if input in vars:
         if vars[input][0]=="func":
@@ -474,6 +488,13 @@ def isTruthy(inp):
 
 def setVar(name,value):
     global vars
+    if "[" in name:
+        try:
+            pureName=name.split("[")[0]
+            vars[pureName][1][getValue(name.split("[")[1].split("]")[0])]=value
+            return
+        except Exception as e:
+            errorMessage(f"Array index {name} out of range!",e=e)
     if name in vars:
         type=vars[name][0]
         value=getValue(value)
@@ -525,6 +546,7 @@ def errorMessage(message:str,e:Exception=None):
         raise e
     exit()
 
+
 def isIn(list,string):
     for i in list:
         if i in string:
@@ -545,7 +567,7 @@ while curLin<len(program):
         keywords[kw](c)
     else:
         if '=' in c:
-            if c.strip().split("=")[0].strip() in vars:
+            if c.strip().split("=")[0].split("[")[0].strip() in vars:
                 setVar(c.strip().split("=")[0].strip(),c.strip().split("=")[1].strip())
     curLin+=1
 onExit()
