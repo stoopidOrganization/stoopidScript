@@ -26,6 +26,7 @@ if timed:
 program=[]
 with open(file,"r") as f:
     program=f.readlines()
+    program=[i.replace("/#", "<HASHTAG>").split("#")[0].replace("<HASHTAG>","#") for i in program]
 
 
 if forcerun:
