@@ -1,11 +1,15 @@
 from sys import argv as args, exit
 import platform
 plt=platform.python_version().split(".")
-if plt[0]=="3" and plt[1]>"10":
-    print("python >3.10 is required")
+plt=[int(i) for i in plt]
+
+if plt[0]==3 and plt[1]<10:
+    print(f"python >=3.10 is required, found {platform.python_version()}")
     exit()
-if plt[0]<"3":
-    print("python >3.10 is required")
+
+if int(plt[0])<3:
+    print("a")
+    print(f"python >=3.10 is required, found {platform.python_version()}")
     exit()
 vars={}
 file="helloWorld.stsc"
@@ -22,6 +26,7 @@ if timed:
 program=[]
 with open(file,"r") as f:
     program=f.readlines()
+    program=[i.replace("/#", "<HASHTAG>").split("#")[0].replace("<HASHTAG>","#") for i in program]
 
 
 if forcerun:
