@@ -1,5 +1,6 @@
 var str test = "Hello World"
 outln test
+outln "/# uwu"#uwu"
 var int test = 1.1
 outln test
 var float test = 1
